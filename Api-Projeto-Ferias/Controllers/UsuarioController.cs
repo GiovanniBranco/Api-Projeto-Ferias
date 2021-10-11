@@ -14,19 +14,21 @@ namespace Api_Projeto_Ferias.Controllers
     [Route("[controller]")]
     public class UsuarioController : Controller
     {
-        private readonly UsuarioContext _context;
+        private readonly FeriasContext _context;
         private readonly IMapper _mapper;
+        private readonly RetornoNotFoundModel _retornoNotFound;
 
-        public UsuarioController( UsuarioContext context, IMapper mapper )
+        public UsuarioController(FeriasContext context, IMapper mapper)
         {
             _context = context;
             _mapper = mapper;
+            _retornoNotFound = new RetornoNotFoundModel();
         }
 
         [HttpGet]
         public IActionResult ObterTodos()
         {
-            return Ok(_context.DbSetUsuario);
+            return Ok(_context.Usuarios);
         }
 
         [HttpGet("{id}")]
@@ -36,7 +38,7 @@ namespace Api_Projeto_Ferias.Controllers
 
             if (usuario == null)
             {
-                return NotFound();
+                return _retornoNotFound.RetornoNotFound(id);
             }
 
             return Ok(usuario);
@@ -47,7 +49,7 @@ namespace Api_Projeto_Ferias.Controllers
         {
             Usuario usuario = _mapper.Map<Usuario>(usuarioDto);
 
-            _context.DbSetUsuario.Add(usuario);
+            _context.Usuarios.Add(usuario);
 
             _context.SaveChanges();
 
@@ -61,7 +63,7 @@ namespace Api_Projeto_Ferias.Controllers
 
             if (usuario == null)
             {
-                return NotFound();
+                return _retornoNotFound.RetornoNotFound(id);
             }
 
             _mapper.Map(usuarioAtualizado, usuario);
@@ -77,10 +79,10 @@ namespace Api_Projeto_Ferias.Controllers
 
             if(usuario == null)
             {
-                return NotFound();
+                return _retornoNotFound.RetornoNotFound(id);
             }
 
-            _context.DbSetUsuario.Remove(usuario);
+            _context.Usuarios.Remove(usuario);
             _context.SaveChanges();
 
             return NoContent();
@@ -88,7 +90,7 @@ namespace Api_Projeto_Ferias.Controllers
 
         private Usuario ConsultarUsuarioDb(int id)
         {
-            Usuario usuario = _context.DbSetUsuario.FirstOrDefault(u => u.Id == id);
+            Usuario usuario = _context.Usuarios.FirstOrDefault(u => u.Id == id);
 
             if (usuario == null)
             {

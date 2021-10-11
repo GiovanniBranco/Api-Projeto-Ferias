@@ -31,8 +31,7 @@ namespace Api_Projeto_Ferias
 
             services.AddControllers();
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
-            services.AddDbContext<UsuarioContext>(opt => opt.UseSqlServer(Configuration.GetConnectionString("ConexaoSqlServer")));
-            services.AddDbContext<UsuarioContext>(opt => opt.UseSqlServer(Configuration.GetConnectionString("ConexaoSqlServer")));
+            services.AddDbContext<FeriasContext>(opt => opt.UseSqlServer(Configuration.GetConnectionString("ConexaoSqlServer")));
 
             services.AddSwaggerGen(c =>
             {
