@@ -4,14 +4,16 @@ using Api_Projeto_Ferias.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Api_Projeto_Ferias.Migrations
 {
     [DbContext(typeof(FeriasContext))]
-    partial class FeriasContextModelSnapshot : ModelSnapshot
+    [Migration("20211013172154_CriandoShadowPropertie")]
+    partial class CriandoShadowPropertie
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

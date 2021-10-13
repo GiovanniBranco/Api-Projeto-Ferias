@@ -5,13 +5,17 @@ using System.Threading.Tasks;
 using Api_Projeto_Ferias.Data;
 using Api_Projeto_Ferias.Data.Dtos;
 using Api_Projeto_Ferias.Models;
+using Api_Projeto_Ferias.Services;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api_Projeto_Ferias.Controllers
 {
+    [Authorize]
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     public class UsuarioController : Controller
     {
         private readonly FeriasContext _context;
@@ -31,8 +35,9 @@ namespace Api_Projeto_Ferias.Controllers
             return Ok(_context.Usuarios);
         }
 
+
         [HttpGet("{id}")]
-        public IActionResult ObterPorId( int id )
+        public IActionResult ObterPorId(int id)
         {
             Usuario usuario = ConsultarUsuarioDb(id);
 
@@ -44,20 +49,29 @@ namespace Api_Projeto_Ferias.Controllers
             return Ok(usuario);
         }
 
+        [AllowAnonymous]
         [HttpPost]
-        public IActionResult Adicionar( [FromBody] UsuarioEntradaDto usuarioDto )
+        public async Task<IActionResult> Adicionar([FromBody] UsuarioEntradaDto usuarioDto)
         {
-            Usuario usuario = _mapper.Map<Usuario>(usuarioDto);
+            if (ModelState.IsValid)
+            {
+                var usuario = new Usuario { UserName = usuarioDto.UserName };
+                usuario.Senha = CriptService.GeraSenhaCriptografada(usuario, usuarioDto.Senha);
 
-            _context.Usuarios.Add(usuario);
+                _context.Usuarios.Add(usuario);
+                var resultado = await _context.SaveChangesAsync();
 
-            _context.SaveChanges();
+                var usuarioDb = _context.Usuarios.FirstOrDefault(u => u.UserName == usuarioDto.UserName);
 
-            return CreatedAtAction(nameof(ObterPorId), new { id = usuario.Id }, usuario);
+                return CreatedAtAction(nameof(ObterPorId), new { id = usuarioDb.Id }, usuarioDb);
+            }
+
+            return BadRequest();
         }
 
+
         [HttpPut("{id}")]
-        public IActionResult Atualizar( int id, UsuarioEntradaDto usuarioAtualizado )
+        public IActionResult Atualizar(int id, [FromBody] UsuarioEntradaDto usuarioAtualizado)
         {
             Usuario usuario = ConsultarUsuarioDb(id);
 
@@ -72,12 +86,13 @@ namespace Api_Projeto_Ferias.Controllers
             return NoContent();
         }
 
+
         [HttpDelete("{id}")]
-        public IActionResult Deletar(int id )
+        public IActionResult Deletar(int id)
         {
             Usuario usuario = ConsultarUsuarioDb(id);
 
-            if(usuario == null)
+            if (usuario == null)
             {
                 return _retornoNotFound.RetornoNotFound(id);
             }
@@ -87,6 +102,7 @@ namespace Api_Projeto_Ferias.Controllers
 
             return NoContent();
         }
+
 
         private Usuario ConsultarUsuarioDb(int id)
         {

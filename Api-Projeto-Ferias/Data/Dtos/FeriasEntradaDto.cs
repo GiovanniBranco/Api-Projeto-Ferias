@@ -1,23 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
+using Api_Projeto_Ferias.Models;
 
-namespace Api_Projeto_Ferias.Models
+namespace Api_Projeto_Ferias.Data.Dtos
 {
-    [Table("ferias")]
-    public class Ferias
+    public class FeriasEntradaDto
     {
-        [Key]
-        public int Id { get; set; }
-
         [Required]
-        [ForeignKey("usuario_Id")]
-        public Usuario Usuario { get; set; }
+        public string Usuario { get; set; }
 
-        [Required(ErrorMessage ="É necessário informar a data de ínicio das férias")]
+        [Required(ErrorMessage = "É necessário informar a data de ínicio das férias")]
         public DateTime DataInicioFerias { get; set; }
 
         [Required(ErrorMessage = "É necessário informar a data de fim das férias")]

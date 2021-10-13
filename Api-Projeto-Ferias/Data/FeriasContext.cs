@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Api_Projeto_Ferias.Data.Configurations;
 using Api_Projeto_Ferias.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -14,6 +11,11 @@ namespace Api_Projeto_Ferias.Data
 
         public FeriasContext( DbContextOptions options ) : base(options)
         {
+        }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.ApplyConfiguration(new FeriasConfiguration());
         }
     }
 }
