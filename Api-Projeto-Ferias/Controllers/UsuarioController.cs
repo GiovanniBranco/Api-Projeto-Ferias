@@ -32,8 +32,25 @@ namespace Api_Projeto_Ferias.Controllers
             _verificaFerias = new VerificaProximasFeriasService(context);
         }
 
+
         [HttpGet]
-        public async Task<IActionResult> ObterTodos()
+        public IActionResult ObterTodos()
+        {
+            var usuarios = _context.Usuarios;
+
+            var usuariosRetorno = new List<UsuarioRetornoSemFeriasDto>();
+
+            foreach (var item in usuarios)
+            {
+                usuariosRetorno.Add(_mapper.Map<UsuarioRetornoSemFeriasDto>(item));
+            }
+
+            return Ok(usuariosRetorno);
+        }
+
+
+        [HttpGet("ferias")]
+        public async Task<IActionResult> ObterTodosComFerias()
         {
             var retorno = new List<SaidaTodosUsuariosDto>();
             var usuarios = await _context.Usuarios.ToListAsync();
@@ -64,43 +81,12 @@ namespace Api_Projeto_Ferias.Controllers
 
             }
 
-
-
-
-
-
-
-
-
-
-
-            //foreach (var feriasItem in ferias)
-            //{
-            //    ListaFerias.Add(new ConjuntoFeriasSaidaDto
-            //    {
-            //        DataFimFerias = feriasItem.DataFimFerias,
-            //        DataInicioFerias = feriasItem.DataInicioFerias,
-            //    });
-
-            //}
-
-            //foreach (var item in ferias)
-            //{
-            //    retorno.Add(new SaidaTodosUsuariosDto
-            //    {
-            //        UserName = item.Usuario
-            //        Ferias = ListaFerias,
-            //    });
-            //}
-
-
-
             return Ok(retorno);
         }
 
 
-        [HttpGet("{id}")]
-        public IActionResult ObterPorId(int id)
+        [HttpGet("ferias/{id}")]
+        public IActionResult ObterPorIdComFerias(int id)
         {
             Usuario usuario = ConsultarUsuarioDb(id);
 
@@ -127,6 +113,21 @@ namespace Api_Projeto_Ferias.Controllers
             return Ok(retorno);
         }
 
+
+        [HttpGet("{id}")]
+        public IActionResult ObterPorId(int id)
+        {
+            var usuario = ConsultarUsuarioDb(id);
+
+            if (usuario == null)
+            {
+                return _retornoNotFound.RetornoNotFound(id);
+            }
+           
+            return Ok(_mapper.Map<UsuarioRetornoSemFeriasDto>(usuario));
+        }
+
+
         [AllowAnonymous]
         [HttpPost]
         public async Task<IActionResult> Adicionar([FromBody] UsuarioEntradaDto usuarioDto)
@@ -135,6 +136,7 @@ namespace Api_Projeto_Ferias.Controllers
             {
                 var usuario = new Usuario { UserName = usuarioDto.UserName };
                 usuario.Senha = CriptService.GeraSenhaCriptografada(usuario, usuarioDto.Senha);
+                usuario.Email = usuarioDto.Email;
 
                 _context.Usuarios.Add(usuario);
                 var resultado = await _context.SaveChangesAsync();
@@ -149,7 +151,7 @@ namespace Api_Projeto_Ferias.Controllers
 
 
         [HttpPut("{id}")]
-        public IActionResult Atualizar(int id, [FromBody] UsuarioEntradaDto usuarioAtualizado)
+        public IActionResult Atualizar(int id, [FromBody] UsuarioEntradaUpdateDto usuarioAtualizado)
         {
             Usuario usuario = ConsultarUsuarioDb(id);
 
@@ -158,7 +160,22 @@ namespace Api_Projeto_Ferias.Controllers
                 return _retornoNotFound.RetornoNotFound(id);
             }
 
-            _mapper.Map(usuarioAtualizado, usuario);
+
+            if (usuarioAtualizado.Email != null )
+            {
+                usuario.Email = usuarioAtualizado.Email;
+            }
+
+            if (usuarioAtualizado.UserName != null)
+            {
+                usuario.UserName = usuarioAtualizado.UserName;
+            }
+
+            if (usuarioAtualizado.Senha != null)
+            {
+                usuario.Senha = CriptService.GeraSenhaCriptografada(usuario, usuarioAtualizado.Senha);
+            }
+
             _context.SaveChanges();
 
             return NoContent();

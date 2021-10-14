@@ -12,12 +12,13 @@ namespace Api_Projeto_Ferias.Models
     [Table("usuario")]
     public class Usuario
     {
-        [Key]
-        [Required]
         public int Id { get; set; }
 
-        [Required(ErrorMessage = "O email é obrigatório")]
+        [Required(ErrorMessage = "O usuário é obrigatório")]
         public string UserName { get; set; }
+
+        [EmailAddress]
+        public string Email { get; set; }
 
         [Required(ErrorMessage = "A senha é obrigatória")]
         [DataType(DataType.Password)]

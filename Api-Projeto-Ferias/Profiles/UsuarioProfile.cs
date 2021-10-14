@@ -13,8 +13,8 @@ namespace Api_Projeto_Ferias.Profiles
         public UsuarioProfile()
         {
             CreateMap<Usuario, UsuarioSaidaDto>();
+            CreateMap<Usuario, UsuarioRetornoSemFeriasDto>();
             CreateMap<UsuarioEntradaDto, Usuario>();
-
         }
     }
 }

@@ -4,14 +4,16 @@ using Api_Projeto_Ferias.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Api_Projeto_Ferias.Migrations
 {
     [DbContext(typeof(FeriasContext))]
-    partial class FeriasContextModelSnapshot : ModelSnapshot
+    [Migration("20211014143408_AlterandoTabelaUsuario")]
+    partial class AlterandoTabelaUsuario
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -71,7 +73,7 @@ namespace Api_Projeto_Ferias.Migrations
 
                     b.Property<string>("UserName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("ultima_alteracao")
                         .ValueGeneratedOnAdd()
@@ -79,9 +81,6 @@ namespace Api_Projeto_Ferias.Migrations
                         .HasDefaultValueSql("getdate()");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("UserName")
-                        .IsUnique();
 
                     b.ToTable("usuario");
                 });
