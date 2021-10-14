@@ -33,9 +33,69 @@ namespace Api_Projeto_Ferias.Controllers
         }
 
         [HttpGet]
-        public IActionResult ObterTodos()
+        public async Task<IActionResult> ObterTodos()
         {
-            return Ok(_context.Usuarios);
+            var retorno = new List<SaidaTodosUsuariosDto>();
+            var usuarios = await _context.Usuarios.ToListAsync();
+
+            foreach (var usuario in usuarios)
+            {
+            var ListaFerias = new List<ConjuntoFeriasSaidaDto>();
+
+                var ferias = await _context.Ferias
+                .Include(u => u.Usuario)
+                .Where(f => f.Usuario.Id == usuario.Id)
+                .ToListAsync();
+
+                foreach (var itemFerias in ferias)
+                {
+                    ListaFerias.Add(new ConjuntoFeriasSaidaDto
+                    {
+                        DataFimFerias = itemFerias.DataFimFerias,
+                        DataInicioFerias = itemFerias.DataInicioFerias,
+                    });
+                }
+
+                retorno.Add(new SaidaTodosUsuariosDto
+                {
+                    UserName = usuario.UserName,
+                    Ferias = ListaFerias,
+                });
+
+            }
+
+
+
+
+
+
+
+
+
+
+
+            //foreach (var feriasItem in ferias)
+            //{
+            //    ListaFerias.Add(new ConjuntoFeriasSaidaDto
+            //    {
+            //        DataFimFerias = feriasItem.DataFimFerias,
+            //        DataInicioFerias = feriasItem.DataInicioFerias,
+            //    });
+
+            //}
+
+            //foreach (var item in ferias)
+            //{
+            //    retorno.Add(new SaidaTodosUsuariosDto
+            //    {
+            //        UserName = item.Usuario
+            //        Ferias = ListaFerias,
+            //    });
+            //}
+
+
+
+            return Ok(retorno);
         }
 
 
