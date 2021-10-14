@@ -10,6 +10,7 @@ using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace Api_Projeto_Ferias.Controllers
 {
@@ -21,12 +22,14 @@ namespace Api_Projeto_Ferias.Controllers
         private readonly FeriasContext _context;
         private readonly IMapper _mapper;
         private readonly RetornoNotFoundModel _retornoNotFound;
+        private readonly VerificaProximasFeriasService _verificaFerias;
 
         public UsuarioController(FeriasContext context, IMapper mapper)
         {
             _context = context;
             _mapper = mapper;
             _retornoNotFound = new RetornoNotFoundModel();
+            _verificaFerias = new VerificaProximasFeriasService(context);
         }
 
         [HttpGet]
@@ -46,7 +49,22 @@ namespace Api_Projeto_Ferias.Controllers
                 return _retornoNotFound.RetornoNotFound(id);
             }
 
-            return Ok(usuario);
+            var proximasFerias = _verificaFerias.ObtemFeriasFuturas(usuario);
+
+            if (proximasFerias == null)
+            {
+                return NoContent();
+            }
+
+            var retorno = new UsuarioSaidaDto
+            {
+                UserName = usuario.UserName,
+                DataInicio = proximasFerias.DataInicioFerias,
+                DataFim = proximasFerias.DataFimFerias,
+                DiasParaProximasFerias = _verificaFerias.CalculaDias(usuario)
+            };
+
+            return Ok(retorno);
         }
 
         [AllowAnonymous]
@@ -106,7 +124,8 @@ namespace Api_Projeto_Ferias.Controllers
 
         private Usuario ConsultarUsuarioDb(int id)
         {
-            Usuario usuario = _context.Usuarios.FirstOrDefault(u => u.Id == id);
+            Usuario usuario = _context.Usuarios
+                .FirstOrDefault(u => u.Id == id);
 
             if (usuario == null)
             {
