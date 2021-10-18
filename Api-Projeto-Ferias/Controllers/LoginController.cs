@@ -17,11 +17,13 @@ namespace Api_Projeto_Ferias.Controllers
     {
         private readonly FeriasContext _context;
         private readonly SignInManager<Usuario> _signInManager;
+        private readonly UserManager<Usuario> _userManager;
 
-        public LoginController(FeriasContext context, SignInManager<Usuario> signInManager)
+        public LoginController(FeriasContext context, SignInManager<Usuario> signInManager, UserManager<Usuario> userManager)
         {
             _context = context;
             _signInManager = signInManager;
+            _userManager = userManager;
         }
 
         [HttpPost]
@@ -39,9 +41,8 @@ namespace Api_Projeto_Ferias.Controllers
 
                 if (resultado.Succeeded)
                 {
-                    var token = TokenService.GeradorToken(logado);
-
-                    return Ok(new RetornoLogin(usuario.UserName, token, DateTime.Now));
+                    var token = await TokenService.GeradorToken(logado, _userManager);
+                    return Ok(new RetornoLogin(usuario.UserName, token.ToString(), DateTime.Now));
                 }
 
                 return Unauthorized("Usuário ou senha inválidos!");
