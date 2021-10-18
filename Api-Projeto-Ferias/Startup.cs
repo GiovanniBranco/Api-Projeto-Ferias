@@ -30,11 +30,22 @@ namespace Api_Projeto_Ferias
             services.AddControllers();
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             services.AddDbContext<FeriasContext>(opt => opt.UseSqlServer(Configuration.GetConnectionString("ConexaoSqlServer")));
-          
-       
 
+            IdentityBuilder builder = services.AddIdentityCore<Usuario>(opcoes =>
+            {
+                opcoes.Password.RequireDigit = true;
+                opcoes.Password.RequireUppercase = true;
+                opcoes.Password.RequireLowercase = true;
+                opcoes.Password.RequireNonAlphanumeric = false;
+                opcoes.Password.RequiredLength = 8;
+            });
 
-            var chave = Encoding.ASCII.GetBytes(Configuration["ChaveToken:SegredoJWT"]);
+            builder = new IdentityBuilder(builder.UserType, typeof(Role), builder.Services)
+                .AddEntityFrameworkStores<FeriasContext>()
+                .AddSignInManager<SignInManager<Usuario>>()
+                .AddRoleManager<RoleManager<Role>>()
+                .AddRoleValidator<RoleValidator<Role>>();
+
 
             services.AddAuthentication(opcoes =>
             {
@@ -48,7 +59,7 @@ namespace Api_Projeto_Ferias
                     opcoes.TokenValidationParameters = new TokenValidationParameters
                     {
                         ValidateIssuerSigningKey = true,
-                        IssuerSigningKey = new SymmetricSecurityKey(chave),
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(Configuration["ChaveToken:SegredoJWT"])),
                         ValidateIssuer = false,
                         ValidateAudience = false
                     };

@@ -20,13 +20,15 @@ namespace Api_Projeto_Ferias.Controllers
     public class UsuarioController : Controller
     {
         private readonly FeriasContext _context;
+        private readonly UserManager<Usuario> _userManager;
         private readonly IMapper _mapper;
         private readonly RetornoNotFoundModel _retornoNotFound;
         private readonly VerificaProximasFeriasService _verificaFerias;
 
-        public UsuarioController(FeriasContext context, IMapper mapper)
+        public UsuarioController(FeriasContext context, IMapper mapper, UserManager<Usuario> userManager)
         {
             _context = context;
+            _userManager = userManager;
             _mapper = mapper;
             _retornoNotFound = new RetornoNotFoundModel();
             _verificaFerias = new VerificaProximasFeriasService(context);
@@ -57,7 +59,7 @@ namespace Api_Projeto_Ferias.Controllers
 
             foreach (var usuario in usuarios)
             {
-            var ListaFerias = new List<ConjuntoFeriasSaidaDto>();
+                var ListaFerias = new List<ConjuntoFeriasSaidaDto>();
 
                 var ferias = await _context.Ferias
                 .Include(u => u.Usuario)
@@ -123,7 +125,7 @@ namespace Api_Projeto_Ferias.Controllers
             {
                 return _retornoNotFound.RetornoNotFound(id);
             }
-           
+
             return Ok(_mapper.Map<UsuarioRetornoSemFeriasDto>(usuario));
         }
 
@@ -135,18 +137,20 @@ namespace Api_Projeto_Ferias.Controllers
             if (ModelState.IsValid)
             {
                 var usuario = new Usuario { UserName = usuarioDto.UserName };
-                usuario.Senha = CriptService.GeraSenhaCriptografada(usuario, usuarioDto.Senha);
                 usuario.Email = usuarioDto.Email;
 
-                _context.Usuarios.Add(usuario);
-                var resultado = await _context.SaveChangesAsync();
+                var resultado = await _userManager.CreateAsync(usuario, usuarioDto.Senha);
 
-                var usuarioDb = _context.Usuarios.FirstOrDefault(u => u.UserName == usuarioDto.UserName);
+                if (resultado.Succeeded)
+                {
+                    var usuarioDb = _context.Usuarios.FirstOrDefault(u => u.UserName == usuarioDto.UserName);
+                    return CreatedAtAction(nameof(ObterPorId), new { id = usuarioDb.Id }, usuarioDb);
+                }
 
-                return CreatedAtAction(nameof(ObterPorId), new { id = usuarioDb.Id }, usuarioDb);
+                return new BadRequestObjectResult($"Não foi possível cadastrar o usuário informado");
             }
 
-            return BadRequest();
+            return new BadRequestObjectResult($"O usuário e senhã são obrigatórios");
         }
 
 
@@ -161,7 +165,7 @@ namespace Api_Projeto_Ferias.Controllers
             }
 
 
-            if (usuarioAtualizado.Email != null )
+            if (usuarioAtualizado.Email != null)
             {
                 usuario.Email = usuarioAtualizado.Email;
             }
@@ -171,10 +175,10 @@ namespace Api_Projeto_Ferias.Controllers
                 usuario.UserName = usuarioAtualizado.UserName;
             }
 
-            if (usuarioAtualizado.Senha != null)
-            {
-                usuario.Senha = CriptService.GeraSenhaCriptografada(usuario, usuarioAtualizado.Senha);
-            }
+            //if (usuarioAtualizado.Senha != null)
+            //{
+            //    usuario.Senha = CriptService.GeraSenhaCriptografada(usuario, usuarioAtualizado.Senha);
+            //}
 
             _context.SaveChanges();
 

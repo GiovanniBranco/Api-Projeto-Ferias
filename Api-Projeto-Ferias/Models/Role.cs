@@ -4,11 +4,9 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Api_Projeto_Ferias.Models
 {
-    [Table("usuario")]
-    public class Usuario : IdentityUser<int>
-    { 
+    [Table("role")]
+    public class Role : IdentityRole<int>
+    {
         public IList<UserRole> UserRoles { get; set; }
-
-        public IList<Ferias> ferias;
     }
 }

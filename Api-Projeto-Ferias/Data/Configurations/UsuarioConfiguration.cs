@@ -10,6 +10,10 @@ namespace Api_Projeto_Ferias.Data.Configurations
         public void Configure(EntityTypeBuilder<Usuario> builder)
         {
             builder
+                .HasKey(u => u.Id);
+               
+
+            builder
                 .Property<DateTime>("ultima_alteracao")
                 .HasDefaultValueSql("getdate()");
 

@@ -20,26 +20,26 @@ namespace Api_Projeto_Ferias.Services
             CriptService.contexto = contexto;
         }
 
-        public static string GeraSenhaCriptografada(Usuario usuario, string senha)
-        {
-            var saltBytes = new byte[64];
-            var provider = new RNGCryptoServiceProvider();
-            provider.GetNonZeroBytes(saltBytes);
-            var salt = Convert.ToBase64String(saltBytes);
+        //public static string GeraSenhaCriptografada(Usuario usuario, string senha)
+        //{
+        //    var saltBytes = new byte[64];
+        //    var provider = new RNGCryptoServiceProvider();
+        //    provider.GetNonZeroBytes(saltBytes);
+        //    var salt = Convert.ToBase64String(saltBytes);
 
-            var rfc2898DeriveBytes = new Rfc2898DeriveBytes(senha, saltBytes, 10000);
-            var senhaHashed = Convert.ToBase64String(rfc2898DeriveBytes.GetBytes(256));
+        //    var rfc2898DeriveBytes = new Rfc2898DeriveBytes(senha, saltBytes, 10000);
+        //    var senhaHashed = Convert.ToBase64String(rfc2898DeriveBytes.GetBytes(256));
 
 
-            IncluirHashESalt(usuario, senhaHashed, salt);
-            return senhaHashed;
-        }
+        //    IncluirHashESalt(usuario, senhaHashed, salt);
+        //    return senhaHashed;
+        //}
 
-        private static void IncluirHashESalt(Usuario usuario, string hash, string salt)
-        {
-            usuario.Hash = hash;
-            usuario.Salt = salt;
-        }
+        //private static void IncluirHashESalt(Usuario usuario, string hash, string salt)
+        //{
+        //    usuario.Hash = hash;
+        //    usuario.Salt = salt;
+        //}
 
         public static bool ComparaSenhas(string senhaEntrada, string hashDb, string saltDb)
         {

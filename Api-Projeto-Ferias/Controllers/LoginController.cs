@@ -16,21 +16,28 @@ namespace Api_Projeto_Ferias.Controllers
     public class LoginController : ControllerBase
     {
         private readonly FeriasContext _context;
+        private readonly SignInManager<Usuario> _signInManager;
 
-        public LoginController(FeriasContext context)
+        public LoginController(FeriasContext context, SignInManager<Usuario> signInManager)
         {
             _context = context;
+            _signInManager = signInManager;
         }
 
         [HttpPost]
-        public IActionResult Login(LoginModel usuario)
+        public async Task<IActionResult> Login(LoginModel usuario)
         {
             if (ModelState.IsValid)
             {
-                var logado = _context.Usuarios.FirstOrDefault(u => u.UserName == usuario.UserName );
-                var resultado = CriptService.ComparaSenhas(usuario.Senha, logado.Hash, logado.Salt);
+                var logado = _context.Usuarios.FirstOrDefault(u => u.UserName == usuario.UserName);
 
-                if (resultado)
+                if (logado == null)
+                    return new UnauthorizedObjectResult($"Usuário ou senha inválidos");
+
+
+                var resultado = await _signInManager.CheckPasswordSignInAsync(logado, usuario.Senha, false);
+
+                if (resultado.Succeeded)
                 {
                     var token = TokenService.GeradorToken(logado);
 
@@ -40,7 +47,7 @@ namespace Api_Projeto_Ferias.Controllers
                 return Unauthorized("Usuário ou senha inválidos!");
             }
 
-            return BadRequest();
+            return new BadRequestObjectResult($"É necessário informar usuário e senha para fazer o login!");
         }
     }
 }
